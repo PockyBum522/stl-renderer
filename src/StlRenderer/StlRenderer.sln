@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StlRenderer", "StlRenderer.csproj", "{C745D60F-9330-4BF9-BE87-48D72C04A159}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C745D60F-9330-4BF9-BE87-48D72C04A159}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C745D60F-9330-4BF9-BE87-48D72C04A159}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C745D60F-9330-4BF9-BE87-48D72C04A159}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C745D60F-9330-4BF9-BE87-48D72C04A159}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
