@@ -87,31 +87,44 @@ static class Program
             // place a point light at xyz=(2,2,2)
             glModel.PointLights.Add(new GLPointLight(2, 2, 2));
 
+            var facetCounter = 0;
             
             foreach (var facet in stl.Facets)
             {
-                var vector = new Vector3(facet.Vertices[0].X, facet.Vertices[0].Y, facet.Vertices[0].Z);
-                var vector2 = new Vector3(Vector3.Zero.X + 0.001f, Vector3.Zero.Y + 0.001f, Vector3.Zero.Z + 0.001f);
+                var vector1 = new Vector3(facet.Vertices[0].X, facet.Vertices[0].Y, facet.Vertices[0].Z);
                 
-                var xLine = GLLine.PointV(vector2, vector, Color.Red, Color.Red);
-                
-                
-                var vector3 = new Vector3(facet.Vertices[1].Z, facet.Vertices[1].Y, facet.Vertices[1].X);
-                var vector4 = new Vector3(Vector3.Zero.X + 0.001f, Vector3.Zero.Y + 0.001f, Vector3.Zero.Z + 0.001f);
-                
-                var yLine = GLLine.PointV(vector4, vector3, Color.Green, Color.Green);
+                var vector2 = new Vector3(
+                    facet.Vertices[1].X - facet.Vertices[0].X, 
+                    facet.Vertices[1].Y - facet.Vertices[0].Y, 
+                    facet.Vertices[1].Z - facet.Vertices[0].Z);
+
+                var xLine = GLLine.PointV(vector1, vector2, Color.Green, Color.Green);
                 
                 
+                var vector3 = new Vector3(facet.Vertices[1].X, facet.Vertices[1].Y, facet.Vertices[1].Z);
                 
-                var vector5 = new Vector3(facet.Vertices[2].Y, facet.Vertices[2].X, facet.Vertices[2].Z);
-                var vector6 = new Vector3(Vector3.Zero.X + 0.001f, Vector3.Zero.Y + 0.001f, Vector3.Zero.Z + 0.001f);
+                var vector4 = new Vector3(
+                    facet.Vertices[2].X - facet.Vertices[1].X, 
+                    facet.Vertices[2].Y - facet.Vertices[1].Y, 
+                    facet.Vertices[2].Z - facet.Vertices[1].Z);
+
+                var yLine = GLLine.PointV(vector3, vector4, Color.Red, Color.Red);
+                    
+                
+                var vector5 = new Vector3(facet.Vertices[2].X, facet.Vertices[2].Y, facet.Vertices[2].Z);
+                
+                var vector6 = new Vector3(
+                    facet.Vertices[0].X - facet.Vertices[2].X, 
+                    facet.Vertices[0].Y - facet.Vertices[2].Y, 
+                    facet.Vertices[0].Z - facet.Vertices[2].Z);
                 
                 var zLine = GLLine.PointV(vector5, vector6, Color.Blue, Color.Blue);
 
+                
                 glModel.AddFigure(new GLLineFigure(xLine, yLine, zLine));
             }
             
-            glCtl.CameraView(CameraViewType.BackTopLeft);
+            glCtl.CameraView(CameraViewType.BackTopRight);
         };
 
         // show the gl window
