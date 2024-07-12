@@ -16,6 +16,9 @@ namespace StlRenderer;
 
 static class Program
 {
+    private static STLDocument _stl;
+    private static GLModel _glModel;
+
     static void Main(string[] args)
     {
         // Debug print args
@@ -40,8 +43,6 @@ static class Program
         //     Console.WriteLine();
         // }
 
-        STLDocument stl;
-
         using var inStream = File.Open(@"D:\Dropbox\Documents\Desktop\ESP32-Ethgate.stl", FileMode.Open);
         
         var tempFilePath = Path.GetTempFileName();
@@ -52,7 +53,7 @@ static class Program
         
         outStream.Close();
 
-        stl = STLDocument.Open(tempFilePath);
+        _stl = STLDocument.Open(tempFilePath);
         
         inStream.Close();
 
@@ -62,10 +63,12 @@ static class Program
         }
         catch { /* Ignore. */ }
 
-        RenderStl(stl);
+        FindFacetsWithMatchingVertexes();
+
+        //RenderStl();
     }
 
-    private static void RenderStl(STLDocument stl)
+    private static void RenderStl()
     {
         // this must called for console application to enable Avalonia framework
         // and must called before any other Avalonia control usage
@@ -79,18 +82,18 @@ static class Program
         {
             if (!isInitial) return;
 
-            var glModel = glCtl.GLModel;
+            _glModel = glCtl.GLModel;
 
             // clear the model
-            glModel.Clear();
+            _glModel.Clear();
 
             // place a point light at xyz=(2,2,2)
-            glModel.PointLights.Add(new GLPointLight(2, 2, 2));
+            _glModel.PointLights.Add(new GLPointLight(2, 2, 2));
             
-            RenderSurfaces(stl, glModel);   
+            RenderSurfaces();   
             
             // Uncommenting this will draw facet outlines as lines over the surfaces
-            // RenderWireframe(stl, glModel);
+            RenderWireframe();
             
             glCtl.CameraView(CameraViewType.BackTopRight);
         };
@@ -99,9 +102,9 @@ static class Program
         w.ShowSync();
     }
 
-    private static void RenderSurfaces(STLDocument stl, GLModel glModel)
+    private static void RenderSurfaces()
     {
-        foreach (var facet in stl.Facets)
+        foreach (var facet in _stl.Facets)
         {
             var a = new Vector3(facet.Vertices[0].X, facet.Vertices[0].Y, facet.Vertices[0].Z);
             var b = new Vector3(facet.Vertices[1].X, facet.Vertices[1].Y, facet.Vertices[1].Z);
@@ -114,15 +117,15 @@ static class Program
             var tri = new GLTriangle(va, vb, vc);
 
             // add triangle to the model
-            glModel.AddFigure(new GLTriangleFigure(tri));
+            _glModel.AddFigure(new GLTriangleFigure(tri));
         }
     }
 
-    private static void RenderWireframe(STLDocument stl, GLModel glModel)
+    private static void RenderWireframe()
     {
         var colorToUse = Color.Black;
         
-        foreach (var facet in stl.Facets)
+        foreach (var facet in _stl.Facets)
         {
             var vector1 = new Vector3(facet.Vertices[0].X, facet.Vertices[0].Y, facet.Vertices[0].Z);
 
@@ -154,42 +157,51 @@ static class Program
             var zLine = GLLine.PointV(vector5, vector6, colorToUse, colorToUse);
 
 
-            glModel.AddFigure(new GLLineFigure(xLine, yLine, zLine));
+            _glModel.AddFigure(new GLLineFigure(xLine, yLine, zLine));
         }
     }
 
-    private static Stream GetData(string filename)
+    private static void FindFacetsWithMatchingVertexes()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream(filename);
+        var facetsSharingAVertex = new List<(Facet, Facet)>();
 
-        if (stream == null)
+        foreach (var facet1 in _stl.Facets)
         {
-            throw new Exception($"Failed to load resource stream: {filename}");
+            foreach (var facet2 in _stl.Facets)
+            {
+                if (!HasCoplanarVertex(facet1, facet2)) continue;
+                
+                facetsSharingAVertex.Add((facet1, facet2));
+            }   
         }
-        else
-        {
-            return stream;
-        }
+
+        Console.WriteLine(facetsSharingAVertex.Count);
     }
-    
-    private static void ValidateStl(STLDocument stl, int expectedFacetCount = 12)
+
+    private static bool HasCoplanarVertex(Facet facet1, Facet facet2)
     {
-        Console.WriteLine($"stl.Facets.Count: {stl.Facets.Count}");
-
-
-        foreach (var facet in stl.Facets)
-        {
-            //Console.WriteLine($"facet.Vertices.Count: {facet.Vertices.Count}");
-        }
-            
+        if (facet1 == facet2) return false;   // We don't want to report on checks of the same two facets
         
-        // Assert.NotNull(stl);
-        // Assert.Equal(expectedFacetCount, stl.Facets.Count);
-        //
-        // foreach (var facet in stl.Facets)
-        //     Assert.Equal(3, facet.Vertices.Count);
+        var matchingPointsCounter = 0;
+        
+        // For each of the points in facet1
+        for (var i = 0; i < 3; i++)
+        {
+            for (var j = 0; j < 3; j++)
+            {
+                // ReSharper disable CompareOfFloatsByEqualityOperator because it doesn't matter as these are not calculated, they are set
+                if (facet1.Vertices[i].X == facet2.Vertices[j].X &&
+                    facet1.Vertices[i].Y == facet2.Vertices[j].Y &&
+                    facet1.Vertices[i].Z == facet2.Vertices[j].Z)
+                {
+                    matchingPointsCounter++;
+                }
+                
+                if (matchingPointsCounter > 1)
+                    return true;
+            }   
+        }
+
+        return false;
     }
-
-
 }
