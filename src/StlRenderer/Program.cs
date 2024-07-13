@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 using System.Reflection;
 using QuantumConcepts.Formats.StereoLithography;
 using SearchAThing.OpenGL.Core;
@@ -11,6 +12,7 @@ using static SearchAThing.OpenGL.Core.Constants;
 using SearchAThing.OpenGL.GUI;
 using static SearchAThing.OpenGL.GUI.Toolkit;
 using SearchAThing.OpenGL.Shapes;
+using Silk.NET.OpenGL;
 
 namespace StlRenderer;
 
@@ -63,9 +65,7 @@ static class Program
         }
         catch { /* Ignore. */ }
 
-        FindFacetsWithMatchingVertexes();
-
-        //RenderStl();
+        RenderStl();
     }
 
     private static void RenderStl()
@@ -78,7 +78,7 @@ static class Program
         var w = GLWindow.Create();
 
         // define the GLModel build function
-        w.GLModel.BuildModel = (glCtl, isInitial) =>
+        w.GLModel.BuildModel = async (glCtl, isInitial) =>
         {
             if (!isInitial) return;
 
@@ -93,13 +93,27 @@ static class Program
             RenderSurfaces();   
             
             // Uncommenting this will draw facet outlines as lines over the surfaces
-            RenderWireframe();
+            //RenderWireframe();
             
             glCtl.CameraView(CameraViewType.BackTopRight);
+
+
+            
+            var renderDevice = new OffscreenRenderDevice(@"D:\Dropbox\Documents\Desktop\Test.bmp", new Size(100, 90));
+
+            //renderDevice.TransferGLPixels(GL );
+            
+            
+            
+            
+            
         };
 
-        // show the gl window
         w.ShowSync();
+        // show the gl window
+        
+        
+        Console.WriteLine();
     }
 
     private static void RenderSurfaces()
